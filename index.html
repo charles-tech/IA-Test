@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calculadora simples</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 1rem;
+      font: 1rem/1.5 system-ui, sans-serif;
+      background: #eef2f8;
+      color: #17263d;
+    }
+    main {
+      width: min(100%, 26rem);
+      padding: 1.75rem;
+      border-radius: 1rem;
+      background: white;
+      box-shadow: 0 12px 36px #17263d1c;
+    }
+    h1 { margin: 0 0 1rem; font-size: 1.65rem; }
+    form { display: grid; gap: .85rem; }
+    label { display: grid; gap: .25rem; font-weight: 600; }
+    input, select, button {
+      width: 100%;
+      padding: .65rem .75rem;
+      border: 1px solid #8190a5;
+      border-radius: .5rem;
+      font: inherit;
+    }
+    button {
+      background: #164bba;
+      border-color: #164bba;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    output {
+      display: block;
+      margin-top: 1rem;
+      padding: .65rem .75rem;
+      overflow-wrap: anywhere;
+      border-radius: .5rem;
+      background: #eef2f8;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Calculadora simples</h1>
+    <form id="calculator">
+      <label>
+        Primeiro número
+        <input id="first" inputmode="decimal" placeholder="Ex.: 12,5" required>
+      </label>
+      <label>
+        Operação
+        <select id="operation">
+          <option value="add">Somar (+)</option>
+          <option value="subtract">Subtrair (−)</option>
+          <option value="multiply">Multiplicar (×)</option>
+          <option value="divide">Dividir (÷)</option>
+        </select>
+      </label>
+      <label>
+        Segundo número
+        <input id="second" inputmode="decimal" placeholder="Ex.: 2" required>
+      </label>
+      <button type="submit">Calcular</button>
+    </form>
+    <output id="result" for="first operation second" aria-live="polite">O resultado aparecerá aqui.</output>
+  </main>
+
+  <script>
+    const formatter = new Intl.NumberFormat('pt-BR', { maximumSignificantDigits: 15 });
+    const operations = {
+      add: (left, right) => left + right,
+      subtract: (left, right) => left - right,
+      multiply: (left, right) => left * right,
+      divide: (left, right) => left / right,
+    };
+
+    function readNumber(value) {
+      const decimal = value.trim().replace(',', '.');
+      return /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(decimal) ? Number(decimal) : NaN;
+    }
+
+    document.querySelector('#calculator').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const left = readNumber(document.querySelector('#first').value);
+      const right = readNumber(document.querySelector('#second').value);
+      const operation = document.querySelector('#operation').value;
+      const output = document.querySelector('#result');
+
+      if (!Number.isFinite(left) || !Number.isFinite(right)) {
+        output.textContent = 'Digite dois números válidos.';
+        return;
+      }
+      if (operation === 'divide' && right === 0) {
+        output.textContent = 'Não é possível dividir por zero.';
+        return;
+      }
+
+      const result = operations[operation](left, right);
+      output.textContent = Number.isFinite(result)
+        ? 'Resultado: ' + formatter.format(Object.is(result, -0) ? 0 : result)
+        : 'O resultado excede o limite da calculadora.';
+    });
+  </script>
+</body>
+</html>
